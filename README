@@ -1,0 +1,7 @@
+Columns are:
+a = v_rel/(2*alpha_X)
+b = alpha_X*m_X/m_phi
+sigma_T * m_X^2 * v_rel^2 / (16pi)
+L_max = number of partial waves summed
+
+All quantities are dimensionless.
