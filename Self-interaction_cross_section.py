@@ -3,29 +3,55 @@
 
 # # Packages
 
-# In[6]:
+# In[197]:
 
 
 import numpy as np
 import pandas as pd #for loading csv Excel files
 import itertools #to merge lists
-from scipy.interpolate import interp1d,interp2d,CubicSpline,UnivariateSpline,RectBivariateSpline
+from scipy.interpolate import interp1d
 import matplotlib.pyplot as pl #for plots
+from matplotlib import rc, rcParams
+
+
+# # Options for plotting
+
+# In[198]:
+
+
+fontsize=26
+legendfontsize=22
+font = {'size' : fontsize}
+rc('font',**font)
+rc('text', usetex=True)
+rc('font', family='serif', serif='Computer Modern Roman')
+
+
+# In[199]:
+
+
+#Color palette accessible to colorblind people (see https://davidmathlogic.com/colorblind/)
+lightblue='#1A85FF'
+blue='#005AB5'
+darkblue='#222255'
+purple='#5D3A9B'
+magenta='#AA4499'
+red='#DC3220'
+orange='#E66100'
+yellow='#FFC20A'
+green='#40B0A6'
+
+colors=[lightblue,blue,darkblue,purple,magenta,red,orange,yellow,green]
 
 
 # # Constants
 
-# In[54]:
+# In[177]:
 
 
-c_ms=2.99792458*10.**8. #m/s
-eV_to_J=1.602176634*10.**(-19.) #J=kg*(m**2/s)
-eVc2_to_kg=eV_to_J/c_ms**2.
-#print(eVc2_to_kg)
-h_Js=6.62606957*10.**(-34.) #J*s=(kg*m**2)/s
-hbar_Js=h_Js/(2.*np.pi) #J*s=(kg*m**2)/s
-#hbar_Js=1.054571817*10.**(-34.) #J*s=(kg*m**2)/s
-#print(hbar_Js)
+c=2.99792458*10.**8.*10.**(-3.) #km/s (not m/s)
+GeV_to_cmminus1=5.06*10.**13.
+GeV_to_g=1.78*10.**(-24.)
 
 
 # # Data dark photon model
@@ -50,14 +76,15 @@ cvals=[datadarkphotonmodel[i][:,2] for i in range(0,len(datadarkphotonmodel))]
 
 # # Generate 2D interpolation function c(a,b)
 
-# In[161]:
+# In[190]:
 
 
 #_____Extract lines in data dark photon model with same bvals (repeat each other)_____
 ibvals=np.array([list(itertools.chain.from_iterable(np.argwhere(bvals==uniquebvals[i]))) for i in range(0,len(uniquebvals))])
 #print(ibvals[0])
 #_____For fixed b interpolate in terms of a: c(a)_____
-#caint=np.array([[interp1d([avals[k] for k in ibvals[j]],[cvals[i][k] for k in ibvals[j]],kind='cubic',fill_value='extrapolate') for j in range(0,len(ibvals))] for i in range(0,len(potentials))])
+###Note: Small, negligible differences between linear and cubic interpolation function. Interpolation function might break down when extrapolating to values far outside the range of [a,b]. 
+#caint=np.array([[interp1d([avals[k] for k in ibvals[j]],[cvals[i][k] for k in ibvals[j]],kind='linear') for j in range(0,len(ibvals))] for i in range(0,len(potentials))])
 caint=np.array([[interp1d([avals[k] for k in ibvals[j]],[cvals[i][k] for k in ibvals[j]],kind='cubic',fill_value='extrapolate') for j in range(0,len(ibvals))] for i in range(0,len(potentials))])
 #print(caint)
 
@@ -84,35 +111,35 @@ for potential in ['attractive']: #['attractive','repulsive']:
 
 # # sigmaT(v)
 
-# In[114]:
-
-
-c_ms
-
-
-# In[152]:
+# In[214]:
 
 
 def sigmaT(potential,alphaX,mX,mphi,v):
-    a=(1/(2.*alphaX))*(v/(c_ms*10.**(-3.))) #Divide by c to make a dimensionless. Ok.
+    a=(1/(2.*alphaX))*(v/c) #Divide by c to make a dimensionless. Ok.
     b=alphaX*(mX/mphi)
-    b=4.52
-    print('[a,b]='+str([a,b]))
-    sigmaT=(16.*np.pi*cab(potential,a,b))/(mX**2.*(v**2/(c_ms*10.**(-3.))**2.))
-    sigmaT_cm2=sigmaT/(5.05*10.**(13.))**2.
-    sigmaTm_cm2g=sigmaT_cm2/(mX*1.78*10**(-24.))
-    sigmaTm2=sigmaTm_cm2g*mX**3.
-    return sigmaTm2
+    #print('[a,b]='+str([a,b]))
+    sigmaT=(16.*np.pi*cab(potential,a,b))/((mX*GeV_to_cmminus1)**2.*(v**2/c**2.)) #cm**2
+    return sigmaT
+
+def sigmaT_over_m(potential,alphaX,mX,mphi,v):
+    sigmaT_over_m=sigmaT(potential,alphaX,mX,mphi,v)/(mX*GeV_to_g) #cm**2/g
+    return sigmaT_over_m
+
+def sigmaT_times_m2(potential,alphaX,mX,mphi,v):
+    sigmaT_times_m2=sigmaT_over_m(potential,alphaX,mX,mphi,v)*mX**3. #cm**2/g*GeV**3.
+    return sigmaT_times_m2
 
 for potential in ['attractive']: #['attractive','repulsive']:
     for alphaX in [10.**(-2.)]:
         for mX in [200]: #GeV
             for mphi in [10**(-3.)]: #GeV.
-                for v in [10]: #km/s
-                    print(sigmaT(potential,alphaX,mX,mphi,v)) #Ok. In accordance with Fig.2 in Sean's paper 1302.3898.
+                for v in [1000]: #km/s
+                    print('sigmaT [cm^2]='+str(sigmaT(potential,alphaX,mX,mphi,v)))
+                    print('sigmaT/m [cm^2/g]='+str(sigmaT_over_m(potential,alphaX,mX,mphi,v)))
+                    print('sigmaT*m [(cm^2/g) GeV^3]='+str(sigmaT_times_m2(potential,alphaX,mX,mphi,v)))
 
 
-# In[160]:
+# In[222]:
 
 
 potential='attractive' #['attractive','repulsive']:
@@ -120,99 +147,22 @@ alphaX=10.**(-2.)
 mX=200 #GeV
 mphi=10**(-3.) #GeV.
 
-vvals=np.logspace(np.log10(1.),np.log10(10.**4.))
-sigmavals=[sigmaT(potential,alphaX,mX,mphi,v) for v in vvals]
+pl.figure(figsize=(8,6))
+for b in [1.00,1.53,1.68,3.13,4.52]:
+    mphi=(alphaX*mX)/b
+    #print(mphi)
+    vvals=np.logspace(np.log10(1.),np.log10(10.**4.),50)
+    sigmavals=[sigmaT_times_m2(potential,alphaX,mX,mphi,v) for v in vvals]
+    pl.plot(vvals,sigmavals,label=str(b))
 
 pl.xscale('log')
 pl.yscale('log')
 pl.xlim([1,10.**4.])
-pl.ylim([0.1,10.**8.])
-pl.plot(vvals,sigmavals)
-pl.show()
-
-
-# In[163]:
-
-
-potential='attractive' #['attractive','repulsive']:
-alphaX=10.**(-2.)
-mX=200 #GeV
-mphi=10**(-3.) #GeV.
-
-vvals=np.logspace(np.log10(1.),np.log10(10.**4.))
-sigmavals=[sigmaT(potential,alphaX,mX,mphi,v) for v in vvals]
-
-pl.xscale('log')
-pl.yscale('log')
-pl.xlim([1,10.**4.])
-pl.ylim([0.1,10.**8.])
-pl.plot(vvals,sigmavals)
-pl.show()
-
-
-# In[85]:
-
-
-pl.xscale('log')
-pl.yscale('log')
-pl.plot(vvals,sigmamvals*vvals,'.')
-pl.show()
-
-
-# In[ ]:
-
-
-#### def sigmaT(potential,alphaX,mX,mphi,v):
-    #_____Conversion to SI units_____
-    #[mX]=GeV/c^2=10.**9.*eV/c^2=10.**9.*eVc2_to_kg*kg_____
-    mX_kg=10.**9.*eVc2_to_kg*mX
-    #print(mX_kg)
-    #[mphi]=MeV/c^2=10.**6.*eV/c^2=10.**6.*eVc2_to_kg*kg_____
-    mphi_kg=10.**6.*eVc2_to_kg*mphi
-    #print(mphi_kg)
-    #[v]=km/s=10**3 m/s_____
-    v_ms=10.**3.*v
-    #print(v_ms)
-    #_____Dimensionless quantities a,b_____
-    a=(1/(2.*alphaX))*(v_ms/c_ms) #Divide by c to make a dimensionless. Ok.
-    b=alphaX*(mX/mphi)
-    print('[a,b]='+str([a,b]))
-    #_____sigmaT_____
-    #sigmaT_m2=(16.*np.pi*cab(potential,a,b))*(hbar_Js**2./(mX_kg**2.*v_ms**2.))
-    sigmaT_m2=(16.*np.pi*cab(potential,a,b))*(h_Js**2./(mX_kg**2.*v_ms**2.))
-    sigmaT_cm2=(10.**2.)**2.*sigmaT_m2
-    sigmaTmX_cm2g=sigmaT_cm2/(mX_kg*10.**3.)
-    #print('sigmaT/m [cm**2]='+str(sigmaT_cm2))
-    print('sigmaT/m [cm**2/g]='+str(sigmaTmX_cm2g))
-    return sigmaT_cm2
-
-for potential in ['attractive']: #['attractive','repulsive']:
-    for alphaX in [10.**(-2.)]:
-        for mX in [200]: #GeV
-            for mphi in [1.]: #MeV.
-                for v in [1000]: #km/s
-                    print(sigmaT(potential,alphaX,mX,mphi,v)) #Ok. In accordance with Fig.2 in Sean's paper 1302.3898.
-
-
-# In[86]:
-
-
-def sigmaTm(potential,alphaX,mX,mphi,v):
-    #_____Conversion to SI units_____
-    #[mX]=GeV/c^2=10.**9.*eV/c^2=10.**9.*eVc2_to_kg*kg_____
-    mX_kg=10.**9.*eVc2_to_kg*mX
-    #_____sigmaT_____
-    sigmaT_cm2=sigmaT(potential,alphaX,mX,mphi,v)
-    #_____sigmaT/m_____
-    sigmaTmX_cm2g=sigmaT_cm2/(mX_kg*10.**3.)
-    return sigmaTmX_cm2g
-
-for potential in ['attractive']: #['attractive','repulsive']:
-    for alphaX in [10.**(-2.)]:
-        for mX in [200]: #GeV
-            for mphi in [1.]: #MeV.
-                for v in [1000]: #km/s
-                    print(sigmaTm(potential,alphaX,mX,mphi,v)) #Ok. In accordance with Fig.2 in Sean's paper 1302.3898.
+pl.ylim([0.1,10.**9.])
+pl.xlabel(r'$v\;{\rm (km/s)}$',fontsize=fontsize) 
+pl.ylabel(r'$\sigma_T \, m_{\chi}^{2}\;{\rm (cm^{2}\,g^{-1}\,GeV^{3})}$',fontsize=fontsize) 
+pl.legend(title=r'$b$',loc='upper right',edgecolor='white',fontsize=legendfontsize)
+pl.show() #Ok. In accordance with Fig. 3 in Sean's paper 1302.3898.
 
 
 # In[ ]:
