@@ -1,7 +1,7 @@
 from __future__ import division
 
 import numpy as np
-from numpy import sqrt, heaviside, pi, sin, cos, log
+from numpy import sqrt, heaviside, pi, sin, cos, log, exp
 from scipy.special import kn, erfi, lambertw
 
 eta = lambda x: x**2.*(kn(0,x)*kn(2,x) - kn(1,x)**2.)
@@ -15,29 +15,29 @@ lminp = lambda beta, kappa: max(3./4.,beta*kappa)
 lambdaT = (1.+cos(2.)+2*sin(2.))/2.
 lambdaV = (9.-cos(4.)-4.*sin(4.))/16.
 
-sigmaT_smallbeta = lambda beta, kappa: 2. * beta**2. * (heaviside(beta*kappa-1.,0.)/2.+eta(lmin(beta,kappa)/kappa))
+sigmaT_smallbeta = lambda beta, kappa: 2. * beta**2. * ((lmin(beta,kappa)**2-1)/(2.* beta**2 * kappa**2) +eta(lmin(beta,kappa)/kappa))
 
-sigmaV_smallbeta = lambda beta, kappa: 4. * beta**2. * (heaviside(beta*kappa-3./4.,0.)/2.+eta(2.*lminp(beta,kappa)/kappa))
+sigmaV_smallbeta = lambda beta, kappa: 4. * beta**2. * ((lminp(beta,kappa)**2-9./16.)/(2. * beta**2 * kappa**2)+eta(2.*lminp(beta,kappa)/kappa))
 
 def sigmaTatt(beta, kappa):
-  if beta < 1: return sigmaT_smallbeta(beta,kappa)
+  if beta < 0.2: return sigmaT_smallbeta(beta,kappa)
   elif beta > 50: return (1. + log(beta)- 1./(2.*log(beta)))**2. - 1./gamma(beta)**2.
-  else: return 1.176 * lambertw(3.857*beta)**2.
+  else: return 2.778 * exp(-0.0115 * beta) * lambertw(2*beta)**2.
 
 def sigmaTrep(beta, kappa):
-  if beta < 1: return sigmaT_smallbeta(beta,kappa)
+  if beta < 0.2: return sigmaT_smallbeta(beta,kappa)
   elif beta > 10: return lambdaT * lambertw(2.*beta)**2.
-  else: return 0.4611 * lambertw(12.47*beta)**2.
+  else: return 1.669 * lambertw(2*beta)**1.582
 
 def sigmaVatt(beta, kappa):
-  if beta < 0.5: return sigmaV_smallbeta(beta,kappa)
+  if beta < 0.2: return sigmaV_smallbeta(beta,kappa)
   elif beta > 20: return (1 + log(beta)- 1/(2*log(beta)))**2/2.
-  else: return 0.4817 * lambertw(9.645*beta)**2
+  else: return 1.7444 * lambertw(2*beta)**1.447
 
 def sigmaVrep(beta, kappa):
-  if beta < 0.5: return sigmaV_smallbeta(beta,kappa)
+  if beta < 0.2: return sigmaV_smallbeta(beta,kappa)
   elif beta > 5: return lambdaV * lambertw(2*beta)**2 + (lambertw(4*pi*beta**2)**2/4.-lambertw(2*beta)**2)/2.
-  else: return 0.2947 * lambertw(17.74*beta)**2
+  else: return 1.520 * lambertw(2*beta)**1.334
 
 def sigma(kappa, beta, mode = 'T', sign = 'attractive'):
   if kappa < 0.5: return 0.

@@ -9,7 +9,7 @@ from scipy.optimize import brentq
 import matplotlib.pyplot as plt
 from cross_sections import sigma
 
-mode = 'V'
+mode = 'T'
 sign = 'attractive'
 
 inputname1 = 'sigma'+mode+'list_'+sign+'_v2.npy'
@@ -155,7 +155,7 @@ ax2.set_xlim((5e-1,1e2))
 ax2.set_ylim((1e-1,2e1))
 
 ax2.plot(beta0grid, np.array([averagedsigma(10.,beta0) for beta0 in beta0grid]), label='Numeric ($\kappa_0 = 10$)', color='xkcd:blue',zorder=2)
-ax2.plot(beta0grid, np.array([averagedsigma(2.,beta0) for beta0 in beta0grid]), label='Numeric ($\kappa_0 = 2$)', color='xkcd:green',zorder=1)
+ax2.plot(beta0grid, np.array([averagedsigma(2.,beta0) for beta0 in beta0grid]), label='Numeric ($\kappa_0 = 5$)', color='xkcd:green',zorder=1)
 ax2.plot(beta0grid, np.array([averagedsigma_analytic(10.,beta0) for beta0 in beta0grid]), label='Analytic ($\kappa_0 = 10$)',linestyle='--', color='xkcd:blue',zorder=2)
 ax2.plot(beta0grid, np.array([averagedsigma_analytic(2.,beta0) for beta0 in beta0grid]), label='Analytic ($\kappa_0 = 2$)',linestyle='--', color='xkcd:green',zorder=1)
 
@@ -173,8 +173,8 @@ np.savetxt(outputname_data, averagedsigmagrid)
 
 plt.xscale('log')
 
-plt.plot(beta0grid, np.array([(averagedsigma_analytic(2.,beta0) - averagedsigma(2.,beta0))/(averagedsigma(2.,beta0)) for beta0 in beta0grid]), label=r'$\kappa_0 = 2$', color='xkcd:green')
-plt.plot(beta0grid, np.array([(averagedsigma_analytic(10.,beta0) - averagedsigma(10.,beta0))/(averagedsigma(10.,beta0)) for beta0 in beta0grid]), label=r'$\kappa_0 = 10$', color='xkcd:blue')
+plt.plot(beta0grid, np.array([(averagedsigma_analytic(5.,beta0) - averagedsigma(5.,beta0))/(averagedsigma(5.,beta0)) for beta0 in beta0grid]), label=r'$\kappa_0 = 5$', color='xkcd:green')
+plt.plot(beta0grid, np.array([(averagedsigma_analytic(20.,beta0) - averagedsigma(20.,beta0))/(averagedsigma(20.,beta0)) for beta0 in beta0grid]), label=r'$\kappa_0 = 20$', color='xkcd:blue')
 plt.plot(beta0grid, np.array([(averagedsigma_analytic(50.,beta0) - averagedsigma(50.,beta0))/(averagedsigma(50.,beta0)) for beta0 in beta0grid]), label=r'$\kappa_0 = 50$', color='xkcd:purple')
 
 plt.legend(fontsize=14)
