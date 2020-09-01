@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from cross_sections import sigma
 
 mode = 'T'
-sign = 'attractive'
+sign = 'repulsive'
 
 inputname1 = 'sigma'+mode+'list_'+sign+'_v2.npy'
 inputname2 = 'sigma'+mode+'list_'+sign+'_smallkappa.npy'
@@ -38,8 +38,15 @@ def sigmainter(kappa, beta):
   else:
     return 10**f(np.amin([np.log10(kappa),kappalist[-1]]),np.log10(beta))[0,0]
 
+print(sigma(2,0.05,mode, sign),sigmainter(2,0.05))
+print(sigma(2,0.25,mode, sign),sigmainter(2,0.25))
+print(sigma(2,0.75,mode, sign),sigmainter(2,0.75))
+print(sigma(2,2,mode, sign),sigmainter(2,2))
+print(sigma(2,10,mode, sign),sigmainter(2,10))
+print(sigma(2,100,mode, sign),sigmainter(2,100))
+
 beta0grid = np.logspace(-3,4, 36, endpoint=True)
-kappa0grid = np.logspace(0,2, 21, endpoint=True)
+kappa0grid = np.logspace(0.4,2, 17, endpoint=True)
 
 plt.xscale('log')
 plt.yscale('log')
@@ -79,6 +86,8 @@ for kappa0 in kappa0grid:
 averagedsigmaarray = np.array(averagedsigmagrid)[:,2].reshape((len(kappa0grid),len(beta0grid)))
 averagedsigmaarray_wrong = np.array(averagedsigmagrid_wrong)[:,2].reshape((len(kappa0grid),len(beta0grid)))
 averagedsigmaarray_analytic = np.array(averagedsigmagrid_analytic)[:,2].reshape((len(kappa0grid),len(beta0grid)))
+
+print(averagedsigmaarray_analytic)
 
 averagedsigmainter = RectBivariateSpline(np.log10(kappa0grid), np.log10(beta0grid), np.log10(averagedsigmaarray))
 averagedsigmainter_wrong = RectBivariateSpline(np.log10(kappa0grid), np.log10(beta0grid), np.log10(averagedsigmaarray_wrong))
