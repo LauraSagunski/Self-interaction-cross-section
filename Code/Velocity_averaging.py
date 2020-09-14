@@ -9,8 +9,8 @@ from scipy.optimize import brentq
 import matplotlib.pyplot as plt
 from cross_sections import sigma
 
-mode = 'T'
-sign = 'repulsive'
+mode = 'V'
+sign = 'attractive'
 
 inputname1 = 'sigma'+mode+'list_'+sign+'_v2.npy'
 inputname2 = 'sigma'+mode+'list_'+sign+'_smallkappa.npy'

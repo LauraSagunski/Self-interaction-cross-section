@@ -4,17 +4,17 @@ import numpy as np
 from numpy import sqrt, heaviside, pi, sin, cos, log, exp, euler_gamma
 from scipy.special import kn, erfi, lambertw
 
-lmin = lambda beta, kappa: max(1.,beta*kappa)
-lminp = lambda beta, kappa: max(3./2.,2.*beta*kappa)
+lmin = lambda beta, kappa: max(1./2.,beta*kappa)
+lminp = lambda beta, kappa: max(1.,2.*beta*kappa)
 eta = lambda x: 2.*log(2.*x)-1-2.*euler_gamma+(1-euler_gamma+log(2.*x))/x**2.
 turn = lambda beta, betalow, a: exp(-(max(beta, betalow) - betalow)*a)
 
 lambdaT = (1.+cos(2.)+2*sin(2.))/2.
 lambdaV = (9.-cos(4.)-4.*sin(4.))/16.
 
-sigmaT_smallbeta = lambda beta, kappa: 2. * beta**2. * ((lmin(beta,kappa)**2-1)/(2.* beta**2 * kappa**2) + eta(kappa/lmin(beta,kappa)))
+sigmaT_smallbeta = lambda beta, kappa: 2. * beta**2. * ((lmin(beta,kappa)**2-1./4.)/(2.* beta**2 * kappa**2) + eta(kappa/lmin(beta,kappa)))
 
-sigmaV_smallbeta = lambda beta, kappa,: 4. * beta**2. * ((lminp(beta,kappa)**2-9./4.)/(8. * beta**2 * kappa**2)+eta(kappa/lminp(beta,kappa)))
+sigmaV_smallbeta = lambda beta, kappa,: 4. * beta**2. * ((lminp(beta,kappa)**2-1.)/(8. * beta**2 * kappa**2)+eta(kappa/lminp(beta,kappa)))
 
 def sigmaTatt(beta, kappa):
   if beta < 1: return sigmaT_smallbeta(beta,kappa)*turn(beta,0.2,-0.63854)
