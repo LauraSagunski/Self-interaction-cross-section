@@ -71,7 +71,7 @@ PhaseShift[a_,L_,wavefunction_,xfinal_]:=Block[{j,djdx,n,dndx,tan\[Delta]L,ax,\[
 
 ];
 
-YukawaPhaseShift[a_,b_,L_,OptionsPattern[]]:=Block[{xmin,xmid,xmax,V,initconds,wavefunction,\[Delta]Lold,\[Delta]Lnew,Test,crit,iter},
+YukawaPhaseShift[a_,b_,L_,OptionsPattern[]]:=Block[{xmin,xmid,xmax,V,initconds,wavefunction,\[Delta]Lold,\[Delta]Lnew,Test,crit,iter,SuccessFlag=True},
 
 	(* Define potential *)
 	(* Sign[b]= +/- for repulsive/attractive *)
@@ -95,7 +95,7 @@ YukawaPhaseShift[a_,b_,L_,OptionsPattern[]]:=Block[{xmin,xmid,xmax,V,initconds,w
 	\[Delta]Lold=0;
 	\[Delta]Lnew=PhaseShift[a,L,wavefunction,xmid];
 	
-	For[ iter=0, Test[\[Delta]Lold,\[Delta]Lnew] && xmin>0.001*Min[(L+1)/a,Abs[b]] && iter < OptionValue[MaxNumIterations], iter++ ,
+	For[ iter=0, Test[\[Delta]Lold,\[Delta]Lnew] (*&& xmin>0.001*Min[(L+1)/a,Abs[b]]*) && iter < OptionValue[MaxNumIterations], iter++ ,
 	
 		xmin=0.5*xmin;
 		initconds={1,(L+1)/xmin};
@@ -105,6 +105,9 @@ YukawaPhaseShift[a_,b_,L_,OptionsPattern[]]:=Block[{xmin,xmid,xmax,V,initconds,w
 		If[OptionValue[VerboseOutput],Print[{xmin,\[Delta]Lold,\[Delta]Lnew}]];
 	
 	]; (* End For *)
+	
+	If[iter >= OptionValue[MaxNumIterations], SuccessFlag=False];
+	(*If[xmin < 0.001*Min[(L+1)/a,Abs[b]], SuccessFlag=False];*)
 	
 	(* --------------------------- *)
 	(* Next test convergence with xmax *)
@@ -126,7 +129,10 @@ YukawaPhaseShift[a_,b_,L_,OptionsPattern[]]:=Block[{xmin,xmid,xmax,V,initconds,w
 
 	]; (* End For *)
 	
-	{\[Delta]Lnew,Abs[\[Delta]Lnew-\[Delta]Lold]}
+	If[iter >= OptionValue[MaxNumIterations], SuccessFlag=False];
+	If[xmax>100*Max[(L+1)/a,Abs[b]], SuccessFlag=False];
+	
+	{\[Delta]Lnew, Abs[\[Delta]Lold/\[Delta]Lnew-1], SuccessFlag}
 
 ];
 
