@@ -4,10 +4,14 @@ import numpy as np
 from numpy import sqrt, heaviside, pi, sin, cos, log, exp, euler_gamma
 from scipy.special import kn, erfi, lambertw
 
+approximate_eta = True
+
 lmin = lambda beta, kappa: max(1./2.,beta*kappa)
 lminp = lambda beta, kappa: max(1.,2.*beta*kappa)
-eta = lambda x: 2.*log(2.*x)-1-2.*euler_gamma+(1-euler_gamma+log(2.*x))/x**2.
-turn = lambda beta, betalow, a: exp(-(max(beta, betalow) - betalow)*a)
+if approximate_eta:
+    eta = lambda x: 2.*log(2.*x)-1-2.*euler_gamma+(1-euler_gamma+log(2.*x))/x**2.
+else:
+    eta = lambda x: 1/x**2 * (- kn(1,1/x)**2 + kn(2,1/x)*kn(0,1/x))
 
 lambdaT = (1.+cos(2.)+2*sin(2.))/2.
 lambdaV = (9.-cos(4.)-4.*sin(4.))/16.
