@@ -46,21 +46,22 @@ def sigmaVrep(beta, kappa, lmin):
   else: return 2.77162*log(beta + 0.801796)
 
 def sigma(kappa, beta, mode = 'T', sign = 'attractive'):
-  if kappa < 0.5: return 0.
+  if not(sign == 'attractive' or sign == 'repulsive'):
+    print('Sign not recognized') 
+    exit()
+  if kappa < 1: return 0.
   if mode == 'T':
     if sign == 'attractive': return sigmaTatt(beta, kappa)
-    elif sign == 'repulsive': return sigmaTrep(beta, kappa)
-    else: print('Sign not recognized') 
+    else: return sigmaTrep(beta, kappa)
   elif mode == 'V':
     if sign == 'attractive': return sigmaVatt(beta, kappa, 1.)
-    elif sign == 'repulsive': return sigmaVrep(beta, kappa, 1.)
-    else: print('Sign not recognized') 
+    else: return sigmaVrep(beta, kappa, 1.)
   elif mode == 'even':
     if sign == 'attractive': return sigmaVatt(beta, kappa, 0.5)
-    elif sign == 'repulsive': return sigmaVrep(beta, kappa, 0.5)
+    else: return sigmaVrep(beta, kappa, 0.5)
   elif mode == 'odd':
     if sign == 'attractive': return sigmaVatt(beta, kappa, 1.5)
-    elif sign == 'repulsive': return sigmaVrep(beta, kappa, 1.5)
+    else: return sigmaVrep(beta, kappa, 1.5)
   elif mode == 'scalar':
     return sigma(kappa, beta, mode = 'even', sign = sign)
   elif mode == 'fermion':
@@ -71,14 +72,3 @@ def sigma(kappa, beta, mode = 'T', sign = 'attractive'):
     print('Mode not recognized')
     exit()
 
-beta0grid = np.logspace(-2,1, 61, endpoint=True)
-plt.xscale('log')
-plt.yscale('log')
-plt.plot(beta0grid, np.array([2.*sigma(2.,beta0,mode='fermion') for beta0 in beta0grid]),linestyle='--')
-plt.plot(beta0grid, np.array([2.*sigma(5.,beta0,mode='fermion') for beta0 in beta0grid]),linestyle='--')
-plt.plot(beta0grid, np.array([2.*sigma(20.,beta0,mode='fermion') for beta0 in beta0grid]),linestyle='--')
-
-#plt.plot(beta0grid, np.array([sigma(2.,beta0,mode='scalar') for beta0 in beta0grid]))
-#plt.plot(beta0grid, np.array([sigma(2.,beta0,mode='fermion') for beta0 in beta0grid]))
-#plt.plot(beta0grid, np.array([sigma(2.,beta0,mode='vector') for beta0 in beta0grid]))
-plt.show()
