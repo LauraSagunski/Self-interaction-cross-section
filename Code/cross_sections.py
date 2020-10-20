@@ -8,6 +8,8 @@ approximate_eta = True
 
 lmin = lambda beta, kappa: max(1./2.,beta*kappa)
 lminp = lambda beta, kappa: max(1.,2.*beta*kappa)
+turn = lambda beta, betalow, a: exp(-(max(beta, betalow) - betalow)*a)
+
 if approximate_eta:
     eta = lambda x: 2.*log(2.*x)-1-2.*euler_gamma+(1-euler_gamma+log(2.*x))/x**2.
 else:
