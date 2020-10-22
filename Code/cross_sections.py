@@ -2,7 +2,7 @@ from __future__ import division
 
 import numpy as np
 from numpy import sqrt, heaviside, pi, sin, cos, log, exp, euler_gamma
-from scipy.special import kn, erfi, lambertw
+from scipy.special import kn, erfi, lambertw, gamma
 import matplotlib.pyplot as plt
 
 approximate_eta = False
@@ -72,3 +72,17 @@ def sigma(kappa, beta, mode = 'T', sign = 'attractive'):
     print('Mode not recognized')
     exit()
 
+def sigma_Hulthen(beta,kappa,eps=1.6):
+    
+    i = 1j
+    unity = 1+0j
+    
+    lam_p = 1 + i*kappa/eps * (1 + np.sqrt( 1 + 2*beta*eps*unity ) )
+    lam_m = 1 + i*kappa/eps * (1 - np.sqrt( 1 + 2*beta*eps*unity ) )
+    
+    arg = i*gamma(lam_p+lam_m-2)/gamma(lam_p)/gamma(lam_m)
+    delta_0 = np.angle(arg)
+   
+    sigma_s_wave = 4*np.pi/kappa**2 * np.sin(delta_0)**2 / np.pi
+
+    return sigma_s_wave
