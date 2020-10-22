@@ -12,38 +12,10 @@ from cross_sections import sigma
 mode = 'V'
 sign = 'attractive'
 
-inputname1 = 'sigma'+mode+'list_'+sign+'_v2.npy'
-inputname2 = 'sigma'+mode+'list_'+sign+'_smallkappa.npy'
 outputname_plot1 = 'sigma'+mode+'_'+sign+'.pdf'
-outputname_plotdiff = 'sigma'+mode+'_'+sign+'_difference.pdf'
-outputname_plotrel = 'sigma'+mode+'_'+sign+'_reldifference.pdf'
 outputname_plot2 = 'sigma'+mode+'_'+sign+'_Cluster.pdf'
 outputname_plot3 = 'sigma'+mode+'_'+sign+'_Dwarf.pdf'
 outputname_data = 'sigma'+mode+'list_'+sign+'.txt'
-
-T1 = np.load(inputname1)
-T2 = np.load(inputname2)
-Tjoined = np.concatenate((T2,T1))
-
-kappalist = np.log10(np.concatenate((np.array([0.5,2,4]),np.logspace(np.log10(5), 2, 10))))
-betalist = np.log10(Tjoined[0][:,0])
-sigmalist = np.log10(np.array([Tjoined[i][:,1] for i in range(len(kappalist))]))
-
-
-f = RectBivariateSpline(kappalist, betalist, sigmalist, kx=1,ky=3)
-
-def sigmainter(kappa, beta):
-  if kappa < 0.5:
-    return 0
-  else:
-    return 10**f(np.amin([np.log10(kappa),kappalist[-1]]),np.log10(beta))[0,0]
-
-print(sigma(2,0.05,mode, sign),sigmainter(2,0.05))
-print(sigma(2,0.25,mode, sign),sigmainter(2,0.25))
-print(sigma(2,0.75,mode, sign),sigmainter(2,0.75))
-print(sigma(2,2,mode, sign),sigmainter(2,2))
-print(sigma(2,10,mode, sign),sigmainter(2,10))
-print(sigma(2,100,mode, sign),sigmainter(2,100))
 
 beta0grid = np.logspace(-3,4, 36, endpoint=True)
 kappa0grid = np.logspace(0.4,2, 17, endpoint=True)
@@ -71,31 +43,23 @@ def wrong_velocity_averaging(xfunction):
 
 averagedsigmagrid = []
 averagedsigmagrid_wrong = []
-averagedsigmagrid_analytic = []
 
 for kappa0 in kappa0grid:
   for beta0 in beta0grid:
 
-    xfunction1 = lambda x: sigmainter(kappa0 * x, beta0 / x**2.) 
-    xfunction2 = lambda x: sigma(kappa0 * x, beta0 / x**2., mode, sign) 
+    xfunction1 = lambda x: sigma(kappa0 * x, beta0 / x**2., mode, sign) 
 
     averagedsigmagrid.append([beta0, kappa0, velocity_averaging(xfunction1)])
     averagedsigmagrid_wrong.append([beta0, kappa0, wrong_velocity_averaging(xfunction1)])
-    averagedsigmagrid_analytic.append([beta0, kappa0, velocity_averaging(xfunction2)])
 
 averagedsigmaarray = np.array(averagedsigmagrid)[:,2].reshape((len(kappa0grid),len(beta0grid)))
 averagedsigmaarray_wrong = np.array(averagedsigmagrid_wrong)[:,2].reshape((len(kappa0grid),len(beta0grid)))
-averagedsigmaarray_analytic = np.array(averagedsigmagrid_analytic)[:,2].reshape((len(kappa0grid),len(beta0grid)))
-
-print(averagedsigmaarray_analytic)
 
 averagedsigmainter = RectBivariateSpline(np.log10(kappa0grid), np.log10(beta0grid), np.log10(averagedsigmaarray))
 averagedsigmainter_wrong = RectBivariateSpline(np.log10(kappa0grid), np.log10(beta0grid), np.log10(averagedsigmaarray_wrong))
-averagedsigmainter_analytic = RectBivariateSpline(np.log10(kappa0grid), np.log10(beta0grid), np.log10(averagedsigmaarray_analytic))
 
 averagedsigma = lambda x, y: 10**averagedsigmainter(np.log10(x),np.log10(y))[0,0]
 averagedsigma_wrong = lambda x, y: 10**averagedsigmainter_wrong(np.log10(x),np.log10(y))[0,0]
-averagedsigma_analytic = lambda x, y: 10**averagedsigmainter_analytic(np.log10(x),np.log10(y))[0,0]
 
 fig, ax1 = plt.subplots()
 
@@ -104,10 +68,11 @@ ax1.set_yscale('log')
 ax1.set_xlim((1e-3,1e4))
 ax1.set_ylim((1e-6,1e2))
 
-ax1.plot(beta0grid, np.array([averagedsigma(10.,beta0) for beta0 in beta0grid]), label='$\overline{\sigma_\mathrm{'+mode+'}}$ ($\kappa_0 = 10$)', color='xkcd:blue',zorder=2)
-ax1.plot(beta0grid, np.array([averagedsigma_wrong(10.,beta0) for beta0 in beta0grid]), label=r'$\langle \sigma_\mathrm{'+mode+'} v_\mathrm{rel} \\rangle / \langle v_\mathrm{rel} \\rangle$', color='xkcd:blue',linestyle='--',zorder=2)
-ax1.plot(beta0grid, [sigmainter(4./np.sqrt(np.pi)*10.,beta0*np.pi/16.) for beta0 in beta0grid], label=r'$\sigma_\mathrm{'+mode+'}(\langle v_\mathrm{rel} \\rangle)$', color='xkcd:blue',linestyle=':',zorder=2)
-ax1.plot(beta0grid, np.array([averagedsigma(2.,beta0) for beta0 in beta0grid]), label='$\overline{\sigma_\mathrm{'+mode+'}}$ ($\kappa_0 = 2$)', color='xkcd:green',zorder=1)
+kappaplot = 10.
+
+ax1.plot(beta0grid, np.array([averagedsigma(kappaplot,beta0) for beta0 in beta0grid]), label='$\overline{\sigma_\mathrm{'+mode+'}}$ ($\kappa_0 = 10$)', color='xkcd:blue',zorder=2)
+ax1.plot(beta0grid, np.array([averagedsigma_wrong(kappaplot,beta0) for beta0 in beta0grid]), label=r'$\langle \sigma_\mathrm{'+mode+'} v_\mathrm{rel} \\rangle / \langle v_\mathrm{rel} \\rangle$', color='xkcd:blue',linestyle='--',zorder=2)
+ax1.plot(beta0grid, [sigma(4./np.sqrt(np.pi)*kappaplot,beta0*np.pi/16., mode, sign) for beta0 in beta0grid], label=r'$\sigma_\mathrm{'+mode+'}(\langle v_\mathrm{rel} \\rangle)$', color='xkcd:blue',linestyle=':',zorder=2)
 
 ax1.legend(fontsize=12,loc=2, frameon=False)
 ax1.set_xlabel(r'$\beta_0$',fontsize=16)
@@ -122,10 +87,9 @@ ax2.set_yscale('log')
 ax2.set_xlim((5e-1,1e2))
 ax2.set_ylim((1e-1,2e1))
 
-ax2.plot(beta0grid, np.array([averagedsigma(10.,beta0) for beta0 in beta0grid]), label='$\overline{\sigma_\mathrm{'+mode+'}}$ ($\kappa_0 = 10$)', color='xkcd:blue',zorder=2)
-ax2.plot(beta0grid, np.array([averagedsigma_wrong(10.,beta0) for beta0 in beta0grid]), label=r'$\langle \sigma_\mathrm{'+mode+'} v_\mathrm{rel} \\rangle / \langle v_\mathrm{rel} \\rangle$ ($\kappa_0 = 10$)', color='xkcd:blue',linestyle='--',zorder=2)
-ax2.plot(beta0grid, [sigmainter(4./np.sqrt(np.pi)*10.,beta0*np.pi/16.) for beta0 in beta0grid], label=r'$\sigma_\mathrm{'+mode+'}(\langle v_\mathrm{rel} \\rangle)$ ($\kappa_0 = 10$)', color='xkcd:blue',linestyle=':',zorder=2)
-ax2.plot(beta0grid, np.array([averagedsigma(2.,beta0) for beta0 in beta0grid]), label='$\overline{\sigma_\mathrm{'+mode+'}}$ ($\kappa_0 = 2$)', color='xkcd:green',zorder=1)
+ax2.plot(beta0grid, np.array([averagedsigma(kappaplot,beta0) for beta0 in beta0grid]), label='$\overline{\sigma_\mathrm{'+mode+'}}$ ($\kappa_0 = 10$)', color='xkcd:blue',zorder=2)
+ax2.plot(beta0grid, np.array([averagedsigma_wrong(kappaplot,beta0) for beta0 in beta0grid]), label=r'$\langle \sigma_\mathrm{'+mode+'} v_\mathrm{rel} \\rangle / \langle v_\mathrm{rel} \\rangle$ ($\kappa_0 = 10$)', color='xkcd:blue',linestyle='--',zorder=2)
+ax2.plot(beta0grid, [sigma(4./np.sqrt(np.pi)*kappaplot,beta0*np.pi/16., mode, sign) for beta0 in beta0grid], label=r'$\sigma_\mathrm{'+mode+'}(\langle v_\mathrm{rel} \\rangle)$', color='xkcd:blue',linestyle=':',zorder=2)
 
 ax2.tick_params(axis='x', labelsize=10)
 ax2.tick_params(axis='y', labelsize=10)
@@ -137,64 +101,6 @@ plt.savefig(outputname_plot1)
 plt.show()
 
 np.savetxt(outputname_data, averagedsigmagrid)
-
-fig, ax1 = plt.subplots()
-
-ax1.set_xscale('log')
-ax1.set_yscale('log')
-ax1.set_xlim((1e-3,1e4))
-ax1.set_ylim((1e-6,1e2))
-
-ax1.plot(beta0grid, np.array([averagedsigma(10.,beta0) for beta0 in beta0grid]), label='Numeric ($\kappa_0 = 10$)', color='xkcd:blue',zorder=2)
-ax1.plot(beta0grid, np.array([averagedsigma(2.,beta0) for beta0 in beta0grid]), label='Numeric ($\kappa_0 = 2$)', color='xkcd:green',zorder=1)
-ax1.plot(beta0grid, np.array([averagedsigma_analytic(10.,beta0) for beta0 in beta0grid]), label='Analytic ($\kappa_0 = 10$)',linestyle='--', color='xkcd:blue',zorder=2)
-ax1.plot(beta0grid, np.array([averagedsigma_analytic(2.,beta0) for beta0 in beta0grid]), label='Analytic ($\kappa_0 = 2$)',linestyle='--', color='xkcd:green',zorder=1)
-
-ax1.legend(fontsize=10,loc=2, frameon=False)
-ax1.set_xlabel(r'$\beta_0$',fontsize=16)
-ax1.set_ylabel(r'$\sigma \, m_\phi^2 / \pi$',fontsize=16)
-ax1.tick_params(axis='x', labelsize=14)
-ax1.tick_params(axis='y', labelsize=14)
-
-ax2 = ax1.inset_axes([0.5, 0.08, 0.47, 0.47])
-
-ax2.set_xscale('log')
-ax2.set_yscale('log')
-ax2.set_xlim((5e-1,1e2))
-ax2.set_ylim((1e-1,2e1))
-
-ax2.plot(beta0grid, np.array([averagedsigma(10.,beta0) for beta0 in beta0grid]), label='Numeric ($\kappa_0 = 10$)', color='xkcd:blue',zorder=2)
-ax2.plot(beta0grid, np.array([averagedsigma(2.,beta0) for beta0 in beta0grid]), label='Numeric ($\kappa_0 = 5$)', color='xkcd:green',zorder=1)
-ax2.plot(beta0grid, np.array([averagedsigma_analytic(10.,beta0) for beta0 in beta0grid]), label='Analytic ($\kappa_0 = 10$)',linestyle='--', color='xkcd:blue',zorder=2)
-ax2.plot(beta0grid, np.array([averagedsigma_analytic(2.,beta0) for beta0 in beta0grid]), label='Analytic ($\kappa_0 = 2$)',linestyle='--', color='xkcd:green',zorder=1)
-
-ax2.tick_params(axis='x', labelsize=10)
-ax2.tick_params(axis='y', labelsize=10)
-
-ax1.indicate_inset_zoom(ax2)
-
-plt.tight_layout()
-plt.savefig(outputname_plotdiff)
-plt.show()
-
-np.savetxt(outputname_data, averagedsigmagrid)
-
-
-plt.xscale('log')
-
-plt.plot(beta0grid, np.array([(averagedsigma_analytic(5.,beta0) - averagedsigma(5.,beta0))/(averagedsigma(5.,beta0)) for beta0 in beta0grid]), label=r'$\kappa_0 = 5$', color='xkcd:green')
-plt.plot(beta0grid, np.array([(averagedsigma_analytic(20.,beta0) - averagedsigma(20.,beta0))/(averagedsigma(20.,beta0)) for beta0 in beta0grid]), label=r'$\kappa_0 = 20$', color='xkcd:blue')
-plt.plot(beta0grid, np.array([(averagedsigma_analytic(50.,beta0) - averagedsigma(50.,beta0))/(averagedsigma(50.,beta0)) for beta0 in beta0grid]), label=r'$\kappa_0 = 50$', color='xkcd:purple')
-
-plt.legend(fontsize=14)
-plt.xlabel(r'$\beta_0$',fontsize=16)
-plt.ylabel('Relative difference',fontsize=16)
-plt.xticks(fontsize=14)
-plt.yticks(fontsize=14)
-
-plt.tight_layout()
-plt.savefig(outputname_plotrel)
-plt.show()
 
 InvGev3tocm2g = 2184e-7
 kmsToSpeedOfLight = 3336e-9
@@ -238,8 +144,6 @@ def mxmax(a):
 def mxminDwarf(a):
   rootfunc = lambda mx: (2. * FixmpCluster(mx, a)) / (v0Dwarf * kmsToSpeedOfLight) - mx
   return brentq(rootfunc, mxmin(a), mxmax(a))
-
-print(FixmpCluster(130., 0.3))
 
 mxgrid = np.logspace(1,3, 101, endpoint=True)
 alphagrid = np.logspace(-2,0, 101, endpoint=True)
