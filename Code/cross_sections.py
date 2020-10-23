@@ -80,9 +80,23 @@ def sigma_Hulthen(beta,kappa,eps=1.6):
     lam_p = 1 + i*kappa/eps * (1 + np.sqrt( 1 + 2*beta*eps*unity ) )
     lam_m = 1 + i*kappa/eps * (1 - np.sqrt( 1 + 2*beta*eps*unity ) )
     
+    if gamma(lam_p) == 0:
+      print(beta,kappa)
+      exit()
     arg = i*gamma(lam_p+lam_m-2)/gamma(lam_p)/gamma(lam_m)
     delta_0 = np.angle(arg)
    
     sigma_s_wave = 4*np.pi/kappa**2 * np.sin(delta_0)**2 / np.pi
 
     return sigma_s_wave
+
+def sigma_combined(kappa,beta,mode = 'T', sign = 'attractive'):
+    if kappa > 1:
+      return sigma(kappa,beta,mode,sign)
+    elif kappa < 0.4:
+      return sigma_Hulthen(beta,kappa)
+    else:
+      return (1-kappa)/0.6*sigma_Hulthen(beta,0.4) + (kappa-0.4)/0.6*sigma(1,beta,mode,sign)
+
+
+
