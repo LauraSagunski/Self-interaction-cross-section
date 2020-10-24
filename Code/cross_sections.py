@@ -26,24 +26,24 @@ sigmaT_smallbeta = lambda beta, kappa: 2. * beta**2. * zeta(kappa, beta, 0.5)
 sigmaV_smallbeta = lambda beta, kappa, lmin: 4. * beta**2. * zeta(kappa, 2.*beta, lmin)
 
 def sigmaTatt(beta, kappa):
-  if beta < 1: return sigmaT_smallbeta(beta,kappa)*turn(beta,0.2,-0.63854)
+  if beta < 1: return sigmaT_smallbeta(beta,kappa)*turn(beta,0.2,-0.64)
   elif beta > 50: return 2. * log(beta) * (log(log(beta)) + 1)
-  else: return 4.70847*log(beta + 0.822474)
+  else: return 4.7*log(beta + 0.82)
 
 def sigmaTrep(beta, kappa):
-  if beta <1: return sigmaT_smallbeta(beta,kappa)*turn(beta,0.2,0.532971)
+  if beta <1: return sigmaT_smallbeta(beta,kappa)*turn(beta,0.2,0.53)
   elif beta > 50: return lambdaT * (log(2.*beta)-log(log(2.*beta)))**2.
-  else: return 2.89927*log(beta + 0.46495)
+  else: return 2.9*log(beta + 0.47)
 
 def sigmaVatt(beta, kappa, lmin):
-  if beta < 0.5: return sigmaV_smallbeta(beta,kappa,lmin)*turn(beta,0.1,-0.671439)
+  if beta < 0.5: return sigmaV_smallbeta(beta,kappa,lmin)*turn(beta,0.1,-0.67)
   elif beta > 25: return (1 + log(beta)- 1/(2.*log(beta)))**2/2.
-  else: return 2.53258*log(beta + 1.04944)
+  else: return 2.5*log(beta + 1.05)
 
 def sigmaVrep(beta, kappa, lmin):
   if beta < 0.5: return sigmaV_smallbeta(beta,kappa,lmin)*turn(beta,0.1,0.370562)
   elif beta > 25: return  log(2. * beta) * (lambdaV * log(2. * beta) - (2.*lambdaV - 1) * log(log(2.*beta)))
-  else: return 2.77162*log(beta + 0.801796)
+  else: return 2.8*log(beta + 0.80)
 
 def sigma(kappa, beta, mode = 'T', sign = 'attractive'):
   if not(sign == 'attractive' or sign == 'repulsive'):
