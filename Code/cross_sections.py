@@ -72,10 +72,18 @@ def sigma(kappa, beta, mode = 'T', sign = 'attractive'):
     print('Mode not recognized')
     exit()
 
-def sigma_Hulthen(beta,kappa,eps=1.6):
+def sigma_Hulthen(beta_abs, kappa, eps=1.6, sign = 'attractive'):
     
     i = 1j
     unity = 1+0j
+    
+    if sign == 'attractive':
+        beta = -1*beta_abs
+    elif sign == 'repulsive':
+        beta = beta_abs
+    else:
+        print('Mode not recognized')
+        exit()
     
     lam_p = 1 + i*kappa/eps * (1 + np.sqrt( 1 + 2*beta*eps*unity ) )
     lam_m = 1 + i*kappa/eps * (1 - np.sqrt( 1 + 2*beta*eps*unity ) )
