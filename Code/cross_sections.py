@@ -72,7 +72,7 @@ def sigma(kappa, beta, mode = 'T', sign = 'attractive'):
     print('Mode not recognized')
     exit()
 
-def sigma_Hulthen(beta_abs, kappa, eps=1.6, sign = 'attractive'):
+def sigma_Hulthen(beta_abs, kappa, sign = 'attractive', eps=1.6):
     
     i = 1j
     unity = 1+0j
@@ -102,9 +102,17 @@ def sigma_combined(kappa,beta,mode = 'T', sign = 'attractive'):
     if kappa > 1:
       return sigma(kappa,beta,mode,sign)
     elif kappa < 0.4:
-      return sigma_Hulthen(beta,kappa)
+      return sigma_Hulthen(min(beta,1e4),kappa,sign)
     else:
-      return (1-kappa)/0.6*sigma_Hulthen(beta,0.4) + (kappa-0.4)/0.6*sigma(1,beta,mode,sign)
+      return (1-kappa)/0.6*sigma_Hulthen(min(beta,1e4),0.4) + (kappa-0.4)/0.6*sigma(1,beta,mode,sign)
 
+#kappa0grid = np.logspace(-3,3, 181, endpoint=True)
+#plt.plot(kappa0grid, [sigma_combined(kappa,0.1) for kappa in kappa0grid])
+#plt.plot(kappa0grid, [sigma_combined(kappa,1) for kappa in kappa0grid])
+#plt.plot(kappa0grid, [sigma_combined(kappa,10) for kappa in kappa0grid])
+#plt.plot(kappa0grid, [sigma_combined(kappa,100) for kappa in kappa0grid])
+#plt.xscale('log')
+#plt.yscale('log')
+#plt.show()
 
 
