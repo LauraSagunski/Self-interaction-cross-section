@@ -100,7 +100,8 @@ mode_factor = {'T': 1, 'V': 1, 'even': 2, 'odd': 0, 'scalar': 2, 'fermion': 0.5,
 beta0grid = np.logspace(-5,5, 101, endpoint=True)
 kappa0grid = np.logspace(-3,3, 61, endpoint=True)
 
-averagedsigmadict = {}
+averagedsigmainterdict = {}
+#averagedsigmadict = {}
 
 for mode in modes:
   for sign in signs:
@@ -110,8 +111,8 @@ for mode in modes:
     averagedsigmagrid = np.loadtxt(outputname_data)
     averagedsigmaarray = np.array(averagedsigmagrid)[:,2].reshape((len(kappa0grid),len(beta0grid)))
 
-    averagedsigmainter = RectBivariateSpline(np.log10(kappa0grid), np.log10(beta0grid), np.log10(averagedsigmaarray))
-    averagedsigmadict[mode+sign] = lambda x, y: 10**averagedsigmainter(np.log10(x),np.log10(y))[0,0]
+    averagedsigmainterdict[mode+sign] = RectBivariateSpline(np.log10(kappa0grid), np.log10(beta0grid), np.log10(averagedsigmaarray))
+#    averagedsigmadict[mode+sign] = lambda x, y: 10**averagedsigmainterdict[mode+sign](np.log10(x),np.log10(y))[0,0]
 
 # Definition of cross section functions
 
@@ -198,7 +199,7 @@ def averagedsigma(kappa0, beta0, mode = 'T', sign = 'attractive'):
     print('Sign not recognized in function averagedsigma()') 
     exit()
   if mode in modes:
-    return averagedsigmadict[mode+sign](kappa0, beta0)
+    return 10**averagedsigmainterdict[mode+sign](np.log10(kappa0), np.log10(beta0))
   else:
     print('Mode not recognized in function averagedsigma()')
     exit()
