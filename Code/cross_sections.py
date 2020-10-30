@@ -109,7 +109,7 @@ for mode in modes:
     outputname_data = 'sigma'+mode+'list_'+sign+'.txt'
 
     averagedsigmagrid = np.loadtxt(outputname_data)
-    averagedsigmaarray = np.array(averagedsigmagrid)[:,2].reshape((len(kappa0grid),len(beta0grid)))
+    averagedsigmaarray = np.array(averagedsigmagrid)[:,2].reshape((len(kappa0grid),len(beta0grid))) + 1e-100
 
     averagedsigmainterdict[mode+sign] = RectBivariateSpline(np.log10(kappa0grid), np.log10(beta0grid), np.log10(averagedsigmaarray))
 #    averagedsigmadict[mode+sign] = lambda x, y: 10**averagedsigmainterdict[mode+sign](np.log10(x),np.log10(y))[0,0]
@@ -199,7 +199,7 @@ def averagedsigma(kappa0, beta0, mode = 'T', sign = 'attractive'):
     print('Sign not recognized in function averagedsigma()') 
     exit()
   if mode in modes:
-    return 10**averagedsigmainterdict[mode+sign](np.log10(kappa0), np.log10(beta0))
+    return 10**averagedsigmainterdict[mode+sign](np.log10(kappa0), np.log10(beta0))[0,0]
   else:
     print('Mode not recognized in function averagedsigma()')
     exit()
