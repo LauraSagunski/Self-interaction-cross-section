@@ -38,7 +38,7 @@ somCluster = 0.2
 v0Dwarf =  50. / (4. / np.sqrt(np.pi))
 
 mxgrid = np.logspace(1,3, 101, endpoint=True)
-mpgrid = np.logspace(-4,-1, 101, endpoint=True)
+mpgrid = np.logspace(-1,2, 101, endpoint=True)
 
 alpha = 0.5
 sDwarfgrid = []
@@ -49,16 +49,17 @@ for mp in mpgrid:
 
   for mx in mxgrid:
 
-    sDwarfgrid.append([mp, mx, sigmaovermx(mp,mx,alpha,v0Dwarf)])
-    sClustergrid.append([mp, mx, sigmaovermx(mp,mx,alpha,v0Cluster)])
-    kDwarfgrid.append([mp, mx, kappa0(mp,mx,alpha,v0Dwarf)])
+    sDwarfgrid.append([mp, mx, sigmaovermx(mp*1e-3,mx,alpha,v0Dwarf)])
+    sClustergrid.append([mp, mx, sigmaovermx(mp*1e-3,mx,alpha,v0Cluster)])
+    kDwarfgrid.append([mp, mx, kappa0(mp*1e-3,mx,alpha,v0Dwarf)])
 
 fig, ax = plt.subplots(figsize=(6,4.5))
+plt.subplots_adjust(bottom=0.15)
 
 plt.xscale('log')
 plt.yscale('log')
 plt.xlim((10,1000))
-plt.ylim((0.0005,0.02))
+plt.ylim((0.5,20))
 
 CS = ax.tricontour(np.array(sDwarfgrid)[:,1], np.array(sDwarfgrid)[:,0], np.array(sDwarfgrid)[:,2], [0.001,0.1,1,10,50],zorder=1,colors=('#1f77b4'))
 
@@ -70,13 +71,13 @@ CS2 = ax.tricontour(np.array(sClustergrid)[:,1], np.array(sClustergrid)[:,0], np
 
 ax.clabel(CS2, inline=1, fmt=fmt, fontsize=14)
 
-ax.contourf(mxgrid, mpgrid, [[sigmaovermx(mp,mx,alpha,v0Dwarf) for mx in mxgrid] for mp in mpgrid], [50,10e10],zorder=3,colors=('#1f77b4'),alpha=0.3)
+ax.contourf(mxgrid, mpgrid, [[sigmaovermx(mp*1e-3,mx,alpha,v0Dwarf) for mx in mxgrid] for mp in mpgrid], [50,10e10],zorder=3,colors=('#1f77b4'),alpha=0.3)
 
-ax.contourf(mxgrid, mpgrid, [[sigmaovermx(mp,mx,alpha,v0Cluster) for mx in mxgrid] for mp in mpgrid], [1,10e10],zorder=3,colors=('#ff7f0e'),alpha=0.3)
+ax.contourf(mxgrid, mpgrid, [[sigmaovermx(mp*1e-3,mx,alpha,v0Cluster) for mx in mxgrid] for mp in mpgrid], [1,10e10],zorder=3,colors=('#ff7f0e'),alpha=0.3)
 
 ax.tricontour(np.array(kDwarfgrid)[:,1], np.array(kDwarfgrid)[:,0], np.array(kDwarfgrid)[:,2], [1],zorder=1,colors=('gray'))
 
-
+plt.scatter(190.,3.,c='#e50000')
 
 #plt.plot(mxminDwarfgrid, alphagrid,  color='grey',zorder=3)
 #plt.plot(mxmaxgrid, alphagrid,  color='grey',zorder=3)
@@ -85,18 +86,17 @@ ax.tricontour(np.array(kDwarfgrid)[:,1], np.array(kDwarfgrid)[:,0], np.array(kDw
 #ax.fill_between(np.concatenate((mxmaxgrid,[mxgrid[-1]])), np.concatenate((alphagrid,[alphagrid[-1]])),0,  color='xkcd:silver',zorder=2)
 
 if alpha >= 0.3:
-  ax.text(15, 0.0015, r'$\sigma_\mathrm{Dwarf} / m_\chi > 50 \, \mathrm{cm^2/g}$', fontsize=14,  color='#1f77b4')
-  ax.text(15, 0.004, r'$\sigma_\mathrm{Cluster} / m_\chi > 1 \, \mathrm{cm^2/g}$', fontsize=14,  color='#ff7f0e',rotation=-45)
+  ax.text(15, 1.5, r'$\sigma_\mathrm{Dwarf} / m_\chi > 50 \, \mathrm{cm^2/g}$', fontsize=14,  color='#1f77b4')
+  ax.text(13, 4, r'$\sigma_\mathrm{Cluster} / m_\chi > 1 \, \mathrm{cm^2/g}$', fontsize=14,  color='#ff7f0e',rotation=-35)
 
-ax.text(80, 0.004, r'$\kappa_\mathrm{Dwarf} = 1$', fontsize=14,  color='gray',rotation=45)
+ax.text(80, 4, r'$\kappa_\mathrm{Dwarf} = 1$', fontsize=14,  color='gray',rotation=45)
 
-plt.xlabel(r'$m_\chi$', fontsize=16)
-plt.ylabel(r'$m_\phi$', fontsize=16)
+plt.xlabel(r'$m_\chi\ [\mathrm{GeV}]$', fontsize=16)
+plt.ylabel(r'$m_\phi\ [\mathrm{MeV}]$', fontsize=16)
 plt.xticks(fontsize=14)
 plt.yticks(fontsize=14)
 plt.title(r'$\alpha_\chi = '+str(alpha)+'$', fontsize=16)
 
-plt.tight_layout()
 plt.savefig(outputname+'alpha_'+str(alpha)+'.pdf')
 plt.show()
 
