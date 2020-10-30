@@ -9,7 +9,7 @@ from scipy.optimize import brentq
 import matplotlib.pyplot as plt
 from matplotlib import rc, rcParams
 import matplotlib.ticker
-from cross_sections import sigma_combined as sigma
+from cross_sections import averagedsigma
 
 fontsize=14
 legendfontsize=14
@@ -24,15 +24,6 @@ sign = 'repulsive'
 outputname = 'sigma'+mode+'_'+sign+'_'
 outputname_data = 'sigma'+mode+'list_'+sign+'.txt'
 
-beta0grid = np.logspace(-4,4, 81, endpoint=True)
-kappa0grid = np.logspace(-3,3, 61, endpoint=True)
-
-averagedsigmagrid = np.loadtxt(outputname_data)
-averagedsigmaarray = np.array(averagedsigmagrid)[:,2].reshape((len(kappa0grid),len(beta0grid)))
-
-averagedsigmainter = RectBivariateSpline(np.log10(kappa0grid), np.log10(beta0grid), np.log10(averagedsigmaarray))
-averagedsigma = lambda x, y: 10**averagedsigmainter(np.log10(x),np.log10(y))[0,0]
-
 InvGev3tocm2g = 2184e-7
 kmsToSpeedOfLight = 3336e-9
 
@@ -40,7 +31,7 @@ beta0 = lambda mp, mx, a, v0: 2. * a * mp / (mx *  (v0 * kmsToSpeedOfLight)**2.)
 kappa0 = lambda mp, mx, a, v0: mx * v0 * kmsToSpeedOfLight / (2. * mp)
 
 def sigmaovermx(mp, mx, a, v0):
-  return np.pi / mp**2. / mx * averagedsigma(kappa0(mp,mx,a,v0), beta0(mp,mx,a,v0)) * InvGev3tocm2g
+  return np.pi / mp**2. / mx * averagedsigma(kappa0(mp,mx,a,v0), beta0(mp,mx,a,v0), mode, sign) * InvGev3tocm2g
 
 v0Cluster = 1900. / (4. / np.sqrt(np.pi))
 v0Group = 1150. / (4. / np.sqrt(np.pi))
@@ -59,6 +50,7 @@ v0s = [v0Cluster, v0Group, v0Galaxy, v0Dwarf]
 print([beta0(0.003,190,0.5,v0) for v0 in v0s])
 print([kappa0(0.003,190,0.5,v0) for v0 in v0s])
 print([sigmaovermx(0.003,190,0.5,v0) for v0 in v0s])
+
 
 for alpha in agrid:
 

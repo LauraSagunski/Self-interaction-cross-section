@@ -2,7 +2,8 @@ from __future__ import division
 
 import numpy as np
 from numpy import sqrt, heaviside, pi, sin, cos, log, exp, euler_gamma
-from scipy.special import kn, erfi, lambertw, gamma
+from scipy.special import kn, erfi, lambertw, gamma, loggamma
+from scipy.interpolate import RectBivariateSpline
 import matplotlib.pyplot as plt
 
 approximate_eta = False
@@ -82,16 +83,13 @@ def sigma_Hulthen(beta_abs, kappa, sign = 'attractive', eps=1.6):
     elif sign == 'repulsive':
         beta = beta_abs
     else:
-        print('Mode not recognized')
+        print('Sign not recognized')
         exit()
     
     lam_p = 1 + i*kappa/eps * (1 + np.sqrt( 1 + 2*beta*eps*unity ) )
     lam_m = 1 + i*kappa/eps * (1 - np.sqrt( 1 + 2*beta*eps*unity ) )
     
-    if gamma(lam_p) == 0:
-      print(beta,kappa)
-      exit()
-    arg = i*gamma(lam_p+lam_m-2)/gamma(lam_p)/gamma(lam_m)
+    arg = i*gamma(lam_p+lam_m-2)/exp(loggamma(lam_p)+loggamma(lam_m))
     delta_0 = np.angle(arg)
    
     sigma_s_wave = 4*np.pi/kappa**2 * np.sin(delta_0)**2 / np.pi
@@ -102,9 +100,38 @@ def sigma_combined(kappa,beta,mode = 'T', sign = 'attractive'):
     if kappa > 1:
       return sigma(kappa,beta,mode,sign)
     elif kappa < 0.4:
-      return sigma_Hulthen(min(beta,1e4),kappa,sign)
+      return sigma_Hulthen(min(beta,1e6),kappa,sign)
     else:
-      return (1-kappa)/0.6*sigma_Hulthen(min(beta,1e4),0.4) + (kappa-0.4)/0.6*sigma(1,beta,mode,sign)
+      return (1-kappa)/0.6*sigma_Hulthen(min(beta,1e6),0.4,sign) + (kappa-0.4)/0.6*sigma(1,beta,mode,sign)
+
+modes = ['T','V','even','odd','scalar','fermion','vector']
+signs = ['attractive','repulsive']
+
+beta0grid = np.logspace(-5,5, 101, endpoint=True)
+kappa0grid = np.logspace(-3,3, 61, endpoint=True)
+
+averagedsigmadict = {}
+
+for mode in modes:
+  for sign in signs:
+
+    outputname_data = 'sigma'+mode+'list_'+sign+'.txt'
+
+    averagedsigmagrid = np.loadtxt(outputname_data)
+    averagedsigmaarray = np.array(averagedsigmagrid)[:,2].reshape((len(kappa0grid),len(beta0grid)))
+
+    averagedsigmainter = RectBivariateSpline(np.log10(kappa0grid), np.log10(beta0grid), np.log10(averagedsigmaarray))
+    averagedsigmadict[mode+sign] = lambda x, y: 10**averagedsigmainter(np.log10(x),np.log10(y))[0,0]
+
+def averagedsigma(kappa0, beta0, mode = 'T', sign = 'attractive'):
+  if not(sign == 'attractive' or sign == 'repulsive'):
+    print('Sign not recognized') 
+    exit()
+  if mode in modes:
+    return averagedsigmadict[mode+sign](kappa0, beta0)
+  else:
+    print('Mode not recognized')
+    exit()
 
 #kappa0grid = np.logspace(-3,3, 181, endpoint=True)
 #plt.plot(kappa0grid, [sigma_combined(kappa,0.1) for kappa in kappa0grid])
